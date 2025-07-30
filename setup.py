@@ -1,23 +1,25 @@
-# setup.py
+"""Setup configuration for py-code-visualizer."""
 
 from setuptools import setup, find_packages
+from pathlib import Path
 
-with open("README.md", "r", encoding='utf-8') as fh:
-    long_description = fh.read()
+# Read README
+readme_path = Path(__file__).parent / "README.md"
+long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists() else ""
 
 setup(
     name="py-code-visualizer",
-    version="0.1.0",
+    version="1.0.0",
     author="Syed Mohd Haider Rizvi",
     author_email="smhrizvi281@gmail.com",
-    description="Architectural intelligence for Python codebases. Transform complex systems into stunning interactive diagrams.",
+    description="Transform complex Python codebases into beautiful interactive diagrams",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/haider1998/PyVisualizer",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Documentation",
         "Topic :: Software Development :: Libraries :: Python Modules",
@@ -30,27 +32,27 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.8',
+    python_requires=">=3.8",
     install_requires=[
-        "click>=8.0.0",
         "networkx>=3.0",
+        "click>=8.0.0",
     ],
     extras_require={
         "dev": [
-            "pytest>=6.0",
-            "black",
-            "flake8",
-            "mypy",
+            "pytest>=7.0.0",
+            "black>=23.0.0",
+            "mypy>=1.0.0",
+            "flake8>=6.0.0",
+            "coverage>=7.0.0",
         ],
-        "build": [
-            "build",
-            "twine",
-            "setuptools>=68.0.0",
+        "rich": [
+            "rich>=13.0.0",
+            "pydantic>=2.0.0",
         ]
     },
     entry_points={
-        'console_scripts': [
-            'py-code-visualizer=pyvizualizer.pyvizualizer.cli:main',
+        "console_scripts": [
+            "py-code-visualizer=pyvizualizer.cli.main:main",
         ],
     },
     include_package_data=True,
