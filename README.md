@@ -4,8 +4,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.8%2B-brightgreen.svg)](https://www.python.org/)
-[![PyPI version](https://img.shields.io/pypi/v/pyvisualizer.svg)](https://pypi.org/project/pyvisualizer/)
-[![Downloads](https://static.pepy.tech/personalized-badge/pyvisualizer?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/pyvisualizer)
+[![PyPI version](https://img.shields.io/pypi/v/py-code-visualizer.svg)](https://pypi.org/project/py-code-visualizer/)
+[![Downloads](https://static.pepy.tech/personalized-badge/py-code-visualizer?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads)](https://pepy.tech/project/py-code-visualizer)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **Architectural intelligence for Python codebases. Transform complex systems into stunning interactive diagrams.**
@@ -19,13 +19,13 @@
 
 </div>
 
-## 🔍 What is PyVisualizer?
+## 🔍 What is py-code-visualizer?
 
-PyVisualizer is a powerful tool that transforms complex Python codebases into intuitive visual diagrams. Created for developers who need to understand large systems quickly, it illuminates the hidden architecture of your projects with beautiful, interactive visualizations.
+py-code-visualizer is a powerful tool that transforms complex Python codebases into intuitive visual diagrams. Created for developers who need to understand large systems quickly, it illuminates the hidden architecture of your projects with beautiful, interactive visualizations.
 
-Instead of spending hours tracing through imports and function calls manually, PyVisualizer automatically maps relationships between modules, classes, and methods, making them instantly comprehensible.
+Instead of spending hours tracing through imports and function calls manually, py-code-visualizer automatically maps relationships between modules, classes, and methods, making them instantly comprehensible.
 
-> *"PyVisualizer transformed how we onboard engineers to our 250K+ LOC Python codebase. What took days now takes hours."* — Senior Engineering Manager at a Fortune 500 company
+> *"py-code-visualizer transformed how we onboard engineers to our 250K+ LOC Python codebase. What took days now takes hours."* — Senior Engineering Manager at a Fortune 500 company
 
 ## 🌟 Key Features
 
@@ -41,7 +41,7 @@ Instead of spending hours tracing through imports and function calls manually, P
 
 ## 📊 Visualization Options
 
-PyVisualizer now offers three powerful visualization options to suit different needs:
+py-code-visualizer now offers three powerful visualization options to suit different needs:
 
 ### 1. Interactive D3.js Visualization (NEW!)
 
@@ -91,13 +91,13 @@ py-code-visualizer /path/to/your/project -f svg -o architecture.svg
 ### Trace specific execution flows
 ```bash
 # Visualize execution flow from an entry point, limited to 3 levels deep
-py-code-visualizer /path/to/your/project -e app.main.start_server -d 3 -o execution_flow.html
+py-code-visualizer /path/to/your/project -e module_a.method_a -d 3 -o execution_flow.html
 ```
 
 ### Focus on specific modules
 ```bash
 # Generate diagram focused only on core components
-py-code-visualizer /path/to/your/project -m core.services api.routes -o core_components.html
+py-code-visualizer /path/to/your/project -m module_a module_b -o core_components.html
 ```
 
 ## 🛠️ Advanced Usage
@@ -105,7 +105,7 @@ py-code-visualizer /path/to/your/project -m core.services api.routes -o core_com
 ### Command Line Options
 
 ```
-pyvisualizer [OPTIONS] PROJECT_PATH
+py-code-visualizer [OPTIONS] PROJECT_PATH
 ```
 
 | Option | Description |
@@ -113,9 +113,9 @@ pyvisualizer [OPTIONS] PROJECT_PATH
 | `path` | Path to Python project or file |
 | `-o, --output` | Output file path |
 | `-f, --format` | Format: `html` (interactive D3.js), `mermaid`, `svg`, `png` (default: `html`) |
-| `-m, --modules` | Include only specified modules |
+| `-m, --modules` | Include only specified modules (e.g., `module_a`, `module_b`) |
 | `-x, --exclude` | Exclude specified modules |
-| `-e, --entry` | Entry point function (format: module.function) |
+| `-e, --entry` | Entry point function (format: `module.function`) |
 | `-d, --depth` | Maximum call depth from entry point (default: 3) |
 | `-v, --verbose` | Enable detailed logging |
 | `--max-nodes` | Maximum nodes in diagram (default: 150) |
@@ -176,15 +176,15 @@ Generate publication-quality diagrams for documentation:
 
 Comprehensive documentation is available at our [GitHub Wiki](https://github.com/haider1998/PyVisualizer/wiki):
 
-- [User Guide](https://github.com/haider1998/PyVisualizer/wiki/User-Guide) - Detailed instructions on using PyVisualizer
+- [User Guide](https://github.com/haider1998/PyVisualizer/wiki/User-Guide) - Detailed instructions on using py-code-visualizer
 - [Visualization Options](https://github.com/haider1998/PyVisualizer/wiki/Visualization-Options) - Compare different visualization engines
-- [API Reference](https://github.com/haider1998/PyVisualizer/wiki/API-Reference) - Complete reference for integrating PyVisualizer into your own tools
+- [API Reference](https://github.com/haider1998/PyVisualizer/wiki/API-Reference) - Complete reference for integrating py-code-visualizer into your own tools
 - [Advanced Techniques](https://github.com/haider1998/PyVisualizer/wiki/Advanced-Techniques) - Tips and tricks for power users
 - [Customization Guide](https://github.com/haider1998/PyVisualizer/wiki/Customization-Guide) - How to customize the visualization output
 
 ## 🧩 How It Works
 
-PyVisualizer leverages Python's Abstract Syntax Tree (AST) to analyze your code without executing it:
+py-code-visualizer leverages Python's Abstract Syntax Tree (AST) to analyze your code without executing it:
 
 1. **Project Scanning** - Discovers Python files while respecting common exclusion patterns
 2. **AST Analysis** - Parses code to extract classes, methods, and their relationships
@@ -250,7 +250,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <div align="center">
   <p>
-    <i>If PyVisualizer helps your team, please consider giving it a ⭐️ on GitHub!</i>
+    <i>If py-code-visualizer helps your team, please consider giving it a ⭐️ on GitHub!</i>
   </p>
   <a href="https://github.com/haider1998/PyVisualizer">
     <img src="https://img.shields.io/github/stars/haider1998/PyVisualizer?style=social" alt="GitHub stars">

@@ -1,0 +1,22 @@
+# Development dependencies
+-r requirements.txt
+
+# Testing
+pytest>=6.0
+pytest-cov>=2.8
+coverage>=5.0
+
+# Code quality
+black>=21.0
+flake8>=3.8
+mypy>=0.800
+isort>=5.0
+
+# Build tools
+build>=0.7
+twine>=3.4
+setuptools>=68.0.0
+
+# Documentation
+sphinx>=4.0
+sphinx-rtd-theme>=0.5
