@@ -6,7 +6,7 @@ Thank you for your interest in contributing to PyVisualizer! This document provi
 
 1. **Fork and Clone**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/PyVisualizer.git
+   git clone https://github.com/haider1998/PyVisualizer.git
    cd PyVisualizer
    ```
 
