@@ -11,10 +11,22 @@ license = {text = "MIT"}
 authors = [
     {name = "Syed Mohd Haider Rizvi", email = "smhrizvi281@gmail.com"}
 ]
+keywords = [
+    "visualization",
+    "code-analysis",
+    "architecture",
+    "diagram",
+    "mermaid",
+    "d3",
+    "python",
+    "ast",
+    "documentation"
+]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Documentation",
+    "Topic :: Software Development :: Quality Assurance",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
@@ -22,41 +34,84 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
 ]
 requires-python = ">=3.8"
 dependencies = [
     "networkx>=3.0",
-    "click>=8.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
     "black>=23.0.0",
     "mypy>=1.0.0",
     "flake8>=6.0.0",
-    "coverage>=7.0.0",
+    "isort>=5.12.0",
 ]
-rich = [
-    "rich>=13.0.0",
-    "pydantic>=2.0.0",
+graphviz = [
+    "graphviz>=0.20.0",
+]
+all = [
+    "graphviz>=0.20.0",
 ]
 
 [project.scripts]
-py-code-visualizer = "pyvizualizer.cli.main:main"
+py-code-visualizer = "pyvisualizer.cli:main"
+pyvisualizer = "pyvisualizer.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/haider1998/PyVisualizer"
+Documentation = "https://github.com/haider1998/PyVisualizer#readme"
+Repository = "https://github.com/haider1998/PyVisualizer"
+Issues = "https://github.com/haider1998/PyVisualizer/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pyvisualizer*"]
 
 [tool.black]
 line-length = 100
-target-version = ['py38']
+target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.mypy_cache
+    | \.pytest_cache
+    | \.venv
+    | build
+    | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
 
 [tool.mypy]
 python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
+addopts = "-v --tb=short"
+
+[tool.coverage.run]
+source = ["pyvisualizer"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
