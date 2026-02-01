@@ -306,12 +306,25 @@ code {
         left: 0;
         right: 0;
         bottom: 0;
-        background: var(--bg-primary);
+        height: calc(100vh - 64px);
+        display: flex !important;
+        background: #f8f9fa;
+        /* Solid light mode background */
         flex-direction: column;
         padding: var(--space-xl);
         gap: var(--space-xl);
         transform: translateX(100%);
         transition: transform var(--transition-base);
+        z-index: 999;
+        border-left: 1px solid var(--border-color);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+    }
+
+    [data-theme="dark"] .nav-menu {
+        background: #0f0f10;
+        /* Solid dark mode background */
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.3);
     }
 
     .nav-menu.open {
@@ -859,6 +872,34 @@ code {
     font-weight: 500;
 }
 
+/* Mobile-specific demo styles */
+@media (max-width: 768px) {
+    .demo-content {
+        min-height: 400px;
+        padding: var(--space-md);
+    }
+
+    .mermaid-wrapper {
+        overflow-x: auto;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        max-height: 450px;
+    }
+
+    .mermaid-wrapper .mermaid {
+        min-width: 600px;
+    }
+
+    .demo-features {
+        gap: var(--space-md);
+        padding: 0 var(--space-md);
+    }
+
+    .demo-feature {
+        font-size: 0.8rem;
+    }
+}
+
 /* ============================================
    Installation Section
    ============================================ */
@@ -1012,7 +1053,21 @@ code {
 
 .comparison-table-wrapper {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     margin-bottom: var(--space-2xl);
+}
+
+/* Ensure table doesn't shrink on mobile */
+@media (max-width: 768px) {
+    .comparison-table-wrapper {
+        margin-left: calc(-1 * var(--space-md));
+        margin-right: calc(-1 * var(--space-md));
+        padding: 0 var(--space-md);
+    }
+
+    .comparison-table {
+        min-width: 600px;
+    }
 }
 
 .comparison-table {
@@ -1385,4 +1440,168 @@ code {
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border-width: 0;
+}
+
+/* ============================================
+   Mobile Responsive Enhancements
+   ============================================ */
+@media (max-width: 768px) {
+
+    /* Container padding */
+    .container {
+        padding: 0 var(--space-md);
+    }
+
+    /* Hero mobile fixes */
+    .hero {
+        padding: calc(64px + var(--space-xl)) 0 var(--space-xl);
+    }
+
+    .hero-title {
+        font-size: 2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-buttons .btn {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+
+    .hero-stats {
+        gap: var(--space-md);
+        flex-wrap: wrap;
+    }
+
+    .stat-divider {
+        display: none;
+    }
+
+    .install-box {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .install-box code {
+        font-size: 0.85rem;
+    }
+
+    /* Section header mobile */
+    .section-header {
+        margin-bottom: var(--space-xl);
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .section-subtitle {
+        font-size: 1rem;
+    }
+
+    /* Features mobile */
+    .features {
+        padding: var(--space-2xl) 0;
+    }
+
+    .feature-card {
+        padding: var(--space-lg);
+    }
+
+    /* Installation mobile */
+    .installation {
+        padding: var(--space-2xl) 0;
+    }
+
+    .install-step {
+        padding: var(--space-lg);
+    }
+
+    .step-number {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+
+    .code-block {
+        padding: var(--space-sm);
+    }
+
+    .code-block code {
+        font-size: 0.75rem;
+        overflow-x: auto;
+    }
+
+    .cli-options {
+        padding: var(--space-lg);
+    }
+
+    /* Use cases mobile */
+    .use-cases {
+        padding: var(--space-2xl) 0;
+    }
+
+    .use-case {
+        padding: var(--space-lg);
+    }
+
+    /* CTA mobile */
+    .cta {
+        padding: var(--space-2xl) 0;
+    }
+
+    .cta h2 {
+        font-size: 1.5rem;
+    }
+
+    /* Footer mobile */
+    .footer-grid {
+        gap: var(--space-xl);
+    }
+
+    .footer-links {
+        margin-top: var(--space-lg);
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: var(--space-md);
+        text-align: center;
+    }
+
+    /* Callout mobile */
+    .comparison-callout {
+        flex-direction: column;
+        padding: var(--space-lg);
+    }
+
+    .callout-icon {
+        font-size: 1.5rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 375px) {
+    .hero-title {
+        font-size: 1.75rem;
+    }
+
+    .install-box code {
+        font-size: 0.75rem;
+    }
+
+    .btn {
+        padding: var(--space-sm) var(--space-md);
+        font-size: 0.875rem;
+    }
 }
