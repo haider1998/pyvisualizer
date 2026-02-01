@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pyvisualizer - Code Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5D2E8C;
+            --secondary-color: #2962FF;
+            --accent-color: #00C853;
+            --danger-color: #F44336;
+            --warning-color: #FF9800;
+            --text-color: #212121;
+            --text-secondary: #757575;
+            --background-color: #f8f9fa;
+            --card-bg-color: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0,0,0,0.1);
+            --node-constructor: #E53935;
+            --node-method: #2962FF;
+            --node-function: #00C853;
+            --node-property: #FF6D00;
+            --node-async: #AA00FF;
+            --node-private: #757575;
+            --link-normal: #616161;
+            --link-cycle: #F44336;
+        }
+        body.dark-mode {
+            --primary-color: #9C64FE;
+            --secondary-color: #448AFF;
+            --accent-color: #4CD964;
+            --text-color: #EEEEEE;
+            --text-secondary: #BDBDBD;
+            --background-color: #121212;
+            --card-bg-color: #1E1E1E;
+            --border-color: #333333;
+            --shadow-color: rgba(0,0,0,0.5);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s ease;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px var(--shadow-color);
+        }
+        .project-title {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .project-title i { margin-right: 0.5rem; }
+        .header-controls { display: flex; gap: 0.75rem; }
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .theme-toggle:hover { background: rgba(255, 255, 255, 0.3); }
+        .layout-container { display: flex; flex: 1; overflow: hidden; }
+        .sidebar {
+            width: 300px;
+            background-color: var(--card-bg-color);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+        }
+        .controls-section {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .controls-section h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+        }
+        .controls-section h3 i { margin-right: 0.5rem; }
+        .search-box { position: relative; margin-bottom: 1rem; }
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            background-color: var(--card-bg-color);
+        }
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            background-color: var(--card-bg-color);
+            margin-bottom: 1rem;
+        }
+        .btn-group { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+        .btn-primary { background-color: var(--primary-color); color: white; }
+        .btn-secondary { background-color: var(--secondary-color); color: white; }
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .graph-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--card-bg-color);
+        }
+        #graph-svg { width: 100%; height: 100%; }
+        .node { cursor: pointer; }
+        .node circle { stroke-width: 2px; stroke: white; }
+        .node text { font-size: 10px; pointer-events: none; }
+        .link { fill: none; stroke-opacity: 0.6; }
+        .link.cycle { stroke: var(--link-cycle); stroke-dasharray: 5, 5; }
+        .node.highlighted circle { stroke: #FFD700; stroke-width: 4px; }
+        .node.faded { opacity: 0.2; }
+        .link.faded { opacity: 0.1; }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+        }
+        .stat-item {
+            background-color: var(--background-color);
+            padding: 0.75rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value { font-size: 1.5rem; font-weight: bold; color: var(--primary-color); }
+        .stat-label { font-size: 0.75rem; color: var(--text-secondary); }
+        .legend { padding: 1rem; }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 0.5rem;
+        }
+        .tooltip {
+            position: absolute;
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.75rem;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 10px var(--shadow-color);
+            pointer-events: none;
+            z-index: 1000;
+            max-width: 300px;
+        }
+        .tooltip h4 { margin-bottom: 0.5rem; color: var(--primary-color); }
+        .tooltip p { margin: 0.25rem 0; color: var(--text-secondary); }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="project-title">
+            <i class="fas fa-project-diagram"></i>
+            <span>pyvisualizer</span>
+        </div>
+        <div class="header-controls">
+            <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </header>
+    <div class="layout-container">
+        <aside class="sidebar">
+            <div class="controls-section">
+                <h3><i class="fas fa-search"></i> Search</h3>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search functions...">
+                </div>
+            </div>
+            <div class="controls-section">
+                <h3><i class="fas fa-filter"></i> Filters</h3>
+                <select id="moduleFilter">
+                    <option value="">All Modules</option>
+                </select>
+                <select id="typeFilter">
+                    <option value="">All Types</option>
+                    <option value="constructor">Constructors</option>
+                    <option value="method">Methods</option>
+                    <option value="function">Functions</option>
+                    <option value="async">Async</option>
+                    <option value="property">Properties</option>
+                    <option value="private">Private</option>
+                </select>
+            </div>
+            <div class="controls-section">
+                <h3><i class="fas fa-chart-bar"></i> Statistics</h3>
+                <div class="stats-grid" id="statsGrid"></div>
+            </div>
+            <div class="controls-section">
+                <h3><i class="fas fa-tools"></i> Controls</h3>
+                <div class="btn-group">
+                    <button class="btn btn-danger" id="highlightCycles">
+                        <i class="fas fa-sync-alt"></i> Cycles
+                    </button>
+                    <button class="btn btn-secondary" id="resetFilters">
+                        <i class="fas fa-undo"></i> Reset
+                    </button>
+                    <button class="btn btn-primary" id="exportSvg">
+                        <i class="fas fa-download"></i> SVG
+                    </button>
+                </div>
+            </div>
+            <div class="legend">
+                <h3><i class="fas fa-palette"></i> Legend</h3>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-constructor);"></span>
+                    Constructor
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-method);"></span>
+                    Method
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-function);"></span>
+                    Function
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-async);"></span>
+                    Async
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-property);"></span>
+                    Property
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background-color: var(--node-private);"></span>
+                    Private
+                </div>
+            </div>
+        </aside>
+        <div class="graph-container" id="graphContainer">
+            <svg id="graph-svg"></svg>
+        </div>
+    </div>
+    <div class="tooltip" id="tooltip" style="display: none;"></div>
+    
+    <script>
+        const graphData = {"nodes": [{"id": "core.graph.FunctionCallVisitor.__init__", "name": "__init__", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "constructor", "is_async": false, "lineno": 22, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_ClassDef", "name": "visit_ClassDef", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 48, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_FunctionDef", "name": "visit_FunctionDef", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 70, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_AsyncFunctionDef", "name": "visit_AsyncFunctionDef", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 74, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._visit_function_common", "name": "_visit_function_common", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 78, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_Assign", "name": "visit_Assign", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 101, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_AnnAssign", "name": "visit_AnnAssign", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 134, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_With", "name": "visit_With", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 153, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.visit_Call", "name": "visit_Call", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 170, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._resolve_call", "name": "_resolve_call", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 190, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._resolve_class_name", "name": "_resolve_class_name", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 341, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._extract_call_target", "name": "_extract_call_target", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 378, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._extract_attribute_chain", "name": "_extract_attribute_chain", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 403, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor._process_annotation", "name": "_process_annotation", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "private", "is_async": false, "lineno": 420, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.FunctionCallVisitor.record_call", "name": "record_call", "module": "core.graph", "class": "core.graph.FunctionCallVisitor", "type": "method", "is_async": false, "lineno": 439, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.build_call_graph", "name": "build_call_graph", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 448, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.__init__", "name": "__init__", "module": "core.graph", "class": null, "type": "constructor", "is_async": false, "lineno": 22, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_ClassDef", "name": "visit_ClassDef", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 48, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_FunctionDef", "name": "visit_FunctionDef", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 70, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_AsyncFunctionDef", "name": "visit_AsyncFunctionDef", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 74, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._visit_function_common", "name": "_visit_function_common", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 78, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_Assign", "name": "visit_Assign", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 101, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_AnnAssign", "name": "visit_AnnAssign", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 134, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_With", "name": "visit_With", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 153, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.visit_Call", "name": "visit_Call", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 170, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._resolve_call", "name": "_resolve_call", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 190, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._resolve_class_name", "name": "_resolve_class_name", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 341, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._extract_call_target", "name": "_extract_call_target", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 378, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._extract_attribute_chain", "name": "_extract_attribute_chain", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 403, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph._process_annotation", "name": "_process_annotation", "module": "core.graph", "class": null, "type": "private", "is_async": false, "lineno": 420, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "core.graph.record_call", "name": "record_call", "module": "core.graph", "class": null, "type": "function", "is_async": false, "lineno": 439, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/graph.py"}, {"id": "cli.main", "name": "main", "module": "cli", "class": null, "type": "function", "is_async": false, "lineno": 22, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/cli.py"}, {"id": "core.analyzer.ImportCollector.__init__", "name": "__init__", "module": "core.analyzer", "class": "core.analyzer.ImportCollector", "type": "constructor", "is_async": false, "lineno": 26, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ImportCollector.visit_Import", "name": "visit_Import", "module": "core.analyzer", "class": "core.analyzer.ImportCollector", "type": "method", "is_async": false, "lineno": 39, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ImportCollector.visit_ImportFrom", "name": "visit_ImportFrom", "module": "core.analyzer", "class": "core.analyzer.ImportCollector", "type": "method", "is_async": false, "lineno": 61, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ImportCollector._resolve_relative_import", "name": "_resolve_relative_import", "module": "core.analyzer", "class": "core.analyzer.ImportCollector", "type": "private", "is_async": false, "lineno": 92, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer.__init__", "name": "__init__", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "constructor", "is_async": false, "lineno": 119, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._collect_definitions", "name": "_collect_definitions", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 143, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "name": "_extract_attribute_chain", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 243, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._process_decorator", "name": "_process_decorator", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 260, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._extract_call_args", "name": "_extract_call_args", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 281, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._extract_arg_value", "name": "_extract_arg_value", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 299, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.ModuleAnalyzer._process_annotation", "name": "_process_annotation", "module": "core.analyzer", "class": "core.analyzer.ModuleAnalyzer", "type": "private", "is_async": false, "lineno": 311, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.__init__", "name": "__init__", "module": "core.analyzer", "class": null, "type": "constructor", "is_async": false, "lineno": 119, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.visit_Import", "name": "visit_Import", "module": "core.analyzer", "class": null, "type": "function", "is_async": false, "lineno": 39, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer.visit_ImportFrom", "name": "visit_ImportFrom", "module": "core.analyzer", "class": null, "type": "function", "is_async": false, "lineno": 61, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._resolve_relative_import", "name": "_resolve_relative_import", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 92, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._collect_definitions", "name": "_collect_definitions", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 143, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._extract_attribute_chain", "name": "_extract_attribute_chain", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 243, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._process_decorator", "name": "_process_decorator", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 260, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._extract_call_args", "name": "_extract_call_args", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 281, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._extract_arg_value", "name": "_extract_arg_value", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 299, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "core.analyzer._process_annotation", "name": "_process_annotation", "module": "core.analyzer", "class": null, "type": "private", "is_async": false, "lineno": 311, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/analyzer.py"}, {"id": "visualizers.mermaid.generate_styled_mermaid", "name": "generate_styled_mermaid", "module": "visualizers.mermaid", "class": null, "type": "function", "is_async": false, "lineno": 29, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/mermaid.py"}, {"id": "visualizers.mermaid._categorize_methods", "name": "_categorize_methods", "module": "visualizers.mermaid", "class": null, "type": "private", "is_async": false, "lineno": 207, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/mermaid.py"}, {"id": "visualizers.mermaid.create_interactive_html", "name": "create_interactive_html", "module": "visualizers.mermaid", "class": null, "type": "function", "is_async": false, "lineno": 238, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/mermaid.py"}, {"id": "visualizers.mermaid.export_diagram", "name": "export_diagram", "module": "visualizers.mermaid", "class": null, "type": "function", "is_async": false, "lineno": 534, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/mermaid.py"}, {"id": "core.resolver.resolve_function_call", "name": "resolve_function_call", "module": "core.resolver", "class": null, "type": "function", "is_async": false, "lineno": 15, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/resolver.py"}, {"id": "core.resolver.filter_by_modules", "name": "filter_by_modules", "module": "core.resolver", "class": null, "type": "function", "is_async": false, "lineno": 78, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/resolver.py"}, {"id": "core.resolver.filter_by_depth", "name": "filter_by_depth", "module": "core.resolver", "class": null, "type": "function", "is_async": false, "lineno": 88, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/core/resolver.py"}, {"id": "utils.file_discovery.parse_python_file", "name": "parse_python_file", "module": "utils.file_discovery", "class": null, "type": "function", "is_async": false, "lineno": 23, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/utils/file_discovery.py"}, {"id": "utils.file_discovery.find_project_python_files", "name": "find_project_python_files", "module": "utils.file_discovery", "class": null, "type": "function", "is_async": false, "lineno": 39, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/utils/file_discovery.py"}, {"id": "utils.file_discovery.get_module_name", "name": "get_module_name", "module": "utils.file_discovery", "class": null, "type": "function", "is_async": false, "lineno": 78, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/utils/file_discovery.py"}, {"id": "utils.file_discovery.analyze_project", "name": "analyze_project", "module": "utils.file_discovery", "class": null, "type": "function", "is_async": false, "lineno": 133, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/utils/file_discovery.py"}, {"id": "visualizers.d3.generate_d3_visualization", "name": "generate_d3_visualization", "module": "visualizers.d3", "class": null, "type": "function", "is_async": false, "lineno": 18, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/d3.py"}, {"id": "visualizers.d3._prepare_graph_data", "name": "_prepare_graph_data", "module": "visualizers.d3", "class": null, "type": "private", "is_async": false, "lineno": 44, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/d3.py"}, {"id": "visualizers.d3.create_d3_html_template", "name": "create_d3_html_template", "module": "visualizers.d3", "class": null, "type": "function", "is_async": false, "lineno": 120, "path": "/Users/smhrizvi/AntiGravityProjects/pyvisualizer/pyvisualizer/visualizers/d3.py"}], "links": [{"source": "core.graph.FunctionCallVisitor.visit_FunctionDef", "target": "core.graph.FunctionCallVisitor._visit_function_common", "is_cycle": false, "lineno": 72}, {"source": "core.graph.FunctionCallVisitor.visit_AsyncFunctionDef", "target": "core.graph.FunctionCallVisitor._visit_function_common", "is_cycle": false, "lineno": 76}, {"source": "core.graph.FunctionCallVisitor.visit_Assign", "target": "core.graph.FunctionCallVisitor._extract_call_target", "is_cycle": false, "lineno": 126}, {"source": "core.graph.FunctionCallVisitor.visit_AnnAssign", "target": "core.graph.FunctionCallVisitor._process_annotation", "is_cycle": false, "lineno": 141}, {"source": "core.graph.FunctionCallVisitor.visit_AnnAssign", "target": "core.graph.FunctionCallVisitor._extract_call_target", "is_cycle": false, "lineno": 147}, {"source": "core.graph.FunctionCallVisitor.visit_With", "target": "core.graph.FunctionCallVisitor._extract_call_target", "is_cycle": false, "lineno": 158}, {"source": "core.graph.FunctionCallVisitor.visit_Call", "target": "core.graph.FunctionCallVisitor._resolve_call", "is_cycle": false, "lineno": 178}, {"source": "core.graph.FunctionCallVisitor.visit_Call", "target": "core.graph.FunctionCallVisitor.record_call", "is_cycle": false, "lineno": 181}, {"source": "core.graph.FunctionCallVisitor._resolve_call", "target": "core.graph.FunctionCallVisitor._resolve_class_name", "is_cycle": false, "lineno": 286}, {"source": "core.graph.FunctionCallVisitor._resolve_call", "target": "core.graph.FunctionCallVisitor._extract_attribute_chain", "is_cycle": false, "lineno": 323}, {"source": "core.graph.FunctionCallVisitor._extract_call_target", "target": "core.graph.FunctionCallVisitor._extract_attribute_chain", "is_cycle": false, "lineno": 398}, {"source": "core.graph.FunctionCallVisitor._extract_attribute_chain", "target": "core.graph.FunctionCallVisitor._extract_attribute_chain", "is_cycle": true, "lineno": 414}, {"source": "core.graph.FunctionCallVisitor._process_annotation", "target": "core.graph.FunctionCallVisitor._extract_attribute_chain", "is_cycle": false, "lineno": 435}, {"source": "core.graph.build_call_graph", "target": "core.resolver.resolve_function_call", "is_cycle": false, "lineno": 493}, {"source": "cli.main", "target": "utils.file_discovery.find_project_python_files", "is_cycle": false, "lineno": 123}, {"source": "cli.main", "target": "utils.file_discovery.analyze_project", "is_cycle": false, "lineno": 133}, {"source": "cli.main", "target": "core.graph.build_call_graph", "is_cycle": false, "lineno": 137}, {"source": "cli.main", "target": "core.resolver.filter_by_modules", "is_cycle": false, "lineno": 143}, {"source": "cli.main", "target": "core.resolver.filter_by_depth", "is_cycle": false, "lineno": 158}, {"source": "cli.main", "target": "visualizers.d3.generate_d3_visualization", "is_cycle": false, "lineno": 281}, {"source": "cli.main", "target": "visualizers.mermaid.generate_styled_mermaid", "is_cycle": false, "lineno": 193}, {"source": "cli.main", "target": "visualizers.mermaid.create_interactive_html", "is_cycle": false, "lineno": 201}, {"source": "core.analyzer.ImportCollector.visit_ImportFrom", "target": "core.analyzer.ImportCollector._resolve_relative_import", "is_cycle": false, "lineno": 66}, {"source": "core.analyzer.ModuleAnalyzer.__init__", "target": "core.analyzer.ModuleAnalyzer._collect_definitions", "is_cycle": false, "lineno": 141}, {"source": "core.analyzer.ModuleAnalyzer._collect_definitions", "target": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "is_cycle": false, "lineno": 161}, {"source": "core.analyzer.ModuleAnalyzer._collect_definitions", "target": "core.analyzer.ModuleAnalyzer._process_decorator", "is_cycle": false, "lineno": 238}, {"source": "core.analyzer.ModuleAnalyzer._collect_definitions", "target": "core.analyzer.ModuleAnalyzer._process_annotation", "is_cycle": false, "lineno": 239}, {"source": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "target": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "is_cycle": true, "lineno": 254}, {"source": "core.analyzer.ModuleAnalyzer._process_decorator", "target": "core.analyzer.ModuleAnalyzer._extract_call_args", "is_cycle": false, "lineno": 272}, {"source": "core.analyzer.ModuleAnalyzer._process_decorator", "target": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "is_cycle": false, "lineno": 275}, {"source": "core.analyzer.ModuleAnalyzer._extract_call_args", "target": "core.analyzer.ModuleAnalyzer._extract_arg_value", "is_cycle": false, "lineno": 294}, {"source": "core.analyzer.ModuleAnalyzer._extract_arg_value", "target": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "is_cycle": false, "lineno": 306}, {"source": "core.analyzer.ModuleAnalyzer._process_annotation", "target": "core.analyzer.ModuleAnalyzer._extract_attribute_chain", "is_cycle": false, "lineno": 325}, {"source": "core.analyzer.ModuleAnalyzer._process_annotation", "target": "core.analyzer.ModuleAnalyzer._process_annotation", "is_cycle": true, "lineno": 338}, {"source": "visualizers.mermaid.generate_styled_mermaid", "target": "visualizers.mermaid._categorize_methods", "is_cycle": false, "lineno": 94}, {"source": "visualizers.mermaid.export_diagram", "target": "visualizers.mermaid.create_interactive_html", "is_cycle": false, "lineno": 610}, {"source": "utils.file_discovery.analyze_project", "target": "utils.file_discovery.get_module_name", "is_cycle": false, "lineno": 157}, {"source": "visualizers.d3.generate_d3_visualization", "target": "visualizers.d3._prepare_graph_data", "is_cycle": false, "lineno": 32}, {"source": "visualizers.d3.generate_d3_visualization", "target": "visualizers.d3.create_d3_html_template", "is_cycle": false, "lineno": 35}], "cycles": [["core.graph.FunctionCallVisitor._extract_attribute_chain"], ["core.analyzer.ModuleAnalyzer._extract_attribute_chain"], ["core.analyzer.ModuleAnalyzer._process_annotation"]], "stats": {"total_nodes": 67, "total_edges": 39, "total_modules": 7, "total_classes": 3, "total_cycles": 3}};
+        
+        // Color mapping
+        const nodeColors = {
+            constructor: '#E53935',
+            method: '#2962FF',
+            function: '#00C853',
+            async: '#AA00FF',
+            property: '#FF6D00',
+            private: '#757575',
+            static: '#00B0FF'
+        };
+        
+        // Setup SVG
+        const container = document.getElementById('graphContainer');
+        const svg = d3.select('#graph-svg');
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        
+        svg.attr('width', width).attr('height', height);
+        
+        // Create zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => g.attr('transform', event.transform));
+        
+        svg.call(zoom);
+        
+        const g = svg.append('g');
+        
+        // Create arrow marker for links
+        svg.append('defs').append('marker')
+            .attr('id', 'arrowhead')
+            .attr('viewBox', '-0 -5 10 10')
+            .attr('refX', 20)
+            .attr('refY', 0)
+            .attr('orient', 'auto')
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .append('path')
+            .attr('d', 'M 0,-5 L 10,0 L 0,5')
+            .attr('fill', '#616161');
+        
+        // Create simulation
+        const simulation = d3.forceSimulation(graphData.nodes)
+            .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(100))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(30));
+        
+        // Create links
+        const link = g.append('g')
+            .selectAll('line')
+            .data(graphData.links)
+            .join('line')
+            .attr('class', d => d.is_cycle ? 'link cycle' : 'link')
+            .attr('stroke', d => d.is_cycle ? '#F44336' : '#616161')
+            .attr('stroke-width', 1.5)
+            .attr('marker-end', 'url(#arrowhead)');
+        
+        // Create nodes
+        const node = g.append('g')
+            .selectAll('g')
+            .data(graphData.nodes)
+            .join('g')
+            .attr('class', 'node')
+            .call(d3.drag()
+                .on('start', dragstarted)
+                .on('drag', dragged)
+                .on('end', dragended));
+        
+        node.append('circle')
+            .attr('r', 12)
+            .attr('fill', d => nodeColors[d.type] || nodeColors.function);
+        
+        node.append('text')
+            .attr('dx', 15)
+            .attr('dy', 4)
+            .text(d => d.name)
+            .attr('fill', 'var(--text-color)');
+        
+        // Tooltip
+        const tooltip = document.getElementById('tooltip');
+        
+        node.on('mouseover', (event, d) => {
+            tooltip.innerHTML = `
+                <h4>${d.name}</h4>
+                <p><strong>Module:</strong> ${d.module}</p>
+                ${d.class ? `<p><strong>Class:</strong> ${d.class.split('.').pop()}</p>` : ''}
+                <p><strong>Type:</strong> ${d.type}</p>
+                <p><strong>Line:</strong> ${d.lineno}</p>
+            `;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        })
+        .on('mouseout', () => tooltip.style.display = 'none');
+        
+        // Simulation tick
+        simulation.on('tick', () => {
+            link.attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+            
+            node.attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+        
+        // Drag functions
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+        
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+        
+        // Populate filters
+        const modules = [...new Set(graphData.nodes.map(n => n.module))].sort();
+        const moduleFilter = document.getElementById('moduleFilter');
+        modules.forEach(m => {
+            const option = document.createElement('option');
+            option.value = m;
+            option.textContent = m;
+            moduleFilter.appendChild(option);
+        });
+        
+        // Populate stats
+        const statsGrid = document.getElementById('statsGrid');
+        const stats = graphData.stats;
+        statsGrid.innerHTML = `
+            <div class="stat-item">
+                <div class="stat-value">${stats.total_nodes}</div>
+                <div class="stat-label">Functions</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.total_edges}</div>
+                <div class="stat-label">Calls</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.total_modules}</div>
+                <div class="stat-label">Modules</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">${stats.total_cycles}</div>
+                <div class="stat-label">Cycles</div>
+            </div>
+        `;
+        
+        // Filter functionality
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const moduleValue = moduleFilter.value;
+            const typeValue = document.getElementById('typeFilter').value;
+            
+            node.classed('faded', d => {
+                const matchSearch = !searchTerm || d.name.toLowerCase().includes(searchTerm) || d.id.toLowerCase().includes(searchTerm);
+                const matchModule = !moduleValue || d.module === moduleValue;
+                const matchType = !typeValue || d.type === typeValue;
+                return !(matchSearch && matchModule && matchType);
+            });
+            
+            link.classed('faded', d => {
+                const sourceNode = graphData.nodes.find(n => n.id === d.source.id || n.id === d.source);
+                const targetNode = graphData.nodes.find(n => n.id === d.target.id || n.id === d.target);
+                const sourceVisible = sourceNode && !node.filter(n => n.id === sourceNode.id).classed('faded');
+                const targetVisible = targetNode && !node.filter(n => n.id === targetNode.id).classed('faded');
+                return !(sourceVisible && targetVisible);
+            });
+        }
+        
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        moduleFilter.addEventListener('change', applyFilters);
+        document.getElementById('typeFilter').addEventListener('change', applyFilters);
+        
+        document.getElementById('highlightCycles').addEventListener('click', () => {
+            const cycleNodes = new Set(graphData.cycles.flat());
+            node.classed('faded', d => !cycleNodes.has(d.id));
+            node.classed('highlighted', d => cycleNodes.has(d.id));
+            link.classed('faded', d => !(cycleNodes.has(d.source.id || d.source) && cycleNodes.has(d.target.id || d.target)));
+        });
+        
+        document.getElementById('resetFilters').addEventListener('click', () => {
+            document.getElementById('searchInput').value = '';
+            moduleFilter.value = '';
+            document.getElementById('typeFilter').value = '';
+            node.classed('faded', false).classed('highlighted', false);
+            link.classed('faded', false);
+        });
+        
+        document.getElementById('exportSvg').addEventListener('click', () => {
+            const svgEl = document.getElementById('graph-svg');
+            const svgData = new XMLSerializer().serializeToString(svgEl);
+            const blob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'pyvisualizer_architecture.svg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        });
+        
+        document.getElementById('themeToggle').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const icon = document.querySelector('#themeToggle i');
+            icon.className = document.body.classList.contains('dark-mode') ? 'fas fa-sun' : 'fas fa-moon';
+        });
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+            svg.attr('width', w).attr('height', h);
+            simulation.force('center', d3.forceCenter(w / 2, h / 2));
+            simulation.alpha(0.3).restart();
+        });
+    </script>
+</body>
+</html>

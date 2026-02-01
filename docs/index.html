@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Primary SEO Meta Tags -->
+    <title>PyVisualizer - Transform Python Code into Interactive Architecture Diagrams</title>
+    <meta name="title" content="PyVisualizer - Transform Python Code into Interactive Architecture Diagrams">
+    <meta name="description"
+        content="Visualize complex Python codebases instantly. Generate interactive D3.js diagrams and Mermaid flowcharts from your code using AST analysis. No code execution required.">
+    <meta name="keywords"
+        content="python code visualization, python architecture diagram, code diagram generator, AST parser, D3.js visualization, function call graph, mermaid diagram, code analysis tool">
+    <meta name="author" content="Syed Mohd Haider Rizvi">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://haider1998.github.io/pyvisualizer/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://haider1998.github.io/pyvisualizer/">
+    <meta property="og:title" content="PyVisualizer - Transform Python Code into Interactive Architecture Diagrams">
+    <meta property="og:description"
+        content="Visualize complex Python codebases instantly. Generate interactive D3.js diagrams and Mermaid flowcharts from your code.">
+    <meta property="og:image" content="https://haider1998.github.io/pyvisualizer/images/og-image.png">
+    <meta property="og:site_name" content="PyVisualizer">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://haider1998.github.io/pyvisualizer/">
+    <meta name="twitter:title" content="PyVisualizer - Transform Python Code into Interactive Architecture Diagrams">
+    <meta name="twitter:description"
+        content="Visualize complex Python codebases instantly. Generate interactive D3.js diagrams and Mermaid flowcharts from your code.">
+    <meta name="twitter:image" content="https://haider1998.github.io/pyvisualizer/images/og-image.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="images/PyVizualizer_Logo.png">
+    <link rel="apple-touch-icon" href="images/PyVizualizer_Logo.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "PyVisualizer",
+        "alternateName": "py-code-visualizer",
+        "description": "Transform complex Python codebases into stunning, interactive architectural diagrams using AST analysis",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Cross-platform",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Syed Mohd Haider Rizvi",
+            "url": "https://github.com/haider1998"
+        },
+        "softwareVersion": "1.0.1",
+        "downloadUrl": "https://pypi.org/project/py-code-visualizer/",
+        "codeRepository": "https://github.com/haider1998/pyvisualizer",
+        "programmingLanguage": "Python",
+        "license": "https://opensource.org/licenses/MIT"
+    }
+    </script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">
+                <img src="images/PyVizualizer_Logo.png" alt="PyVisualizer Logo" class="logo-img">
+                <span>PyVisualizer</span>
+            </a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#demo">Demo</a></li>
+                <li><a href="#installation">Install</a></li>
+                <li><a href="#comparison">Compare</a></li>
+                <li><a href="https://github.com/haider1998/pyvisualizer" target="_blank" rel="noopener"
+                        class="nav-github">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                        GitHub
+                    </a></li>
+                <li><button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+                        <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5" />
+                            <path
+                                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+                        </svg>
+                        <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                        </svg>
+                    </button></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-bg">
+            <div class="aurora aurora-1"></div>
+            <div class="aurora aurora-2"></div>
+            <div class="aurora aurora-3"></div>
+        </div>
+        <div class="container hero-content">
+            <div class="hero-badge">
+                <span class="badge-icon">🚀</span>
+                <span>v1.0.1 — Now on PyPI</span>
+            </div>
+            <h1 class="hero-title">
+                Transform Python Code into
+                <span class="gradient-text">Interactive Architecture Diagrams</span>
+            </h1>
+            <p class="hero-subtitle">
+                Visualize complex codebases instantly. Generate beautiful D3.js force-directed graphs
+                and Mermaid flowcharts from your Python code — without executing a single line.
+            </p>
+            <div class="hero-cta">
+                <div class="install-box">
+                    <code id="installCmd">pip install py-code-visualizer</code>
+                    <button class="copy-btn" data-copy="pip install py-code-visualizer" aria-label="Copy command">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <svg class="check-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="hero-buttons">
+                    <a href="#demo" class="btn btn-primary">See Demo</a>
+                    <a href="https://github.com/haider1998/pyvisualizer" target="_blank" rel="noopener"
+                        class="btn btn-secondary">View on GitHub</a>
+                </div>
+            </div>
+            <div class="hero-stats">
+                <div class="stat">
+                    <span class="stat-value">Python 3.8-3.12</span>
+                    <span class="stat-label">Supported Versions</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-value">100% Safe</span>
+                    <span class="stat-label">AST-based, No Execution</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-value">MIT License</span>
+                    <span class="stat-label">Open Source</span>
+                </div>
+            </div>
+        </div>
+        <div class="hero-scroll">
+            <a href="#features" aria-label="Scroll to features">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M19 12l-7 7-7-7" />
+                </svg>
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-badge">Features</span>
+                <h2 class="section-title">Everything You Need to Understand Your Code</h2>
+                <p class="section-subtitle">From quick analysis to deep architectural insights, PyVisualizer has you
+                    covered.</p>
+            </div>
+            <div class="features-grid">
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #5D2E8C;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                        </svg>
+                    </div>
+                    <h3>AST-Based Analysis</h3>
+                    <p>Pure static analysis using Python's Abstract Syntax Tree. No code execution, completely safe for
+                        any codebase.</p>
+                </article>
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #2962FF;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="18" cy="5" r="3" />
+                            <circle cx="6" cy="12" r="3" />
+                            <circle cx="18" cy="19" r="3" />
+                            <path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98" />
+                        </svg>
+                    </div>
+                    <h3>Function Call Graphs</h3>
+                    <p>Track function and method calls across modules. See exactly how your code connects and flows.</p>
+                </article>
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #00C853;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18M9 21V9" />
+                        </svg>
+                    </div>
+                    <h3>Interactive D3.js Visualizations</h3>
+                    <p>Force-directed graphs with search, filter, zoom, pan, and dark mode. All in a single HTML file.
+                    </p>
+                </article>
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #FF6D00;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                        </svg>
+                    </div>
+                    <h3>Mermaid Diagrams</h3>
+                    <p>Generate diagrams that render natively in GitHub, GitLab, VS Code, and any Mermaid viewer.</p>
+                </article>
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #AA00FF;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 20h9" />
+                            <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                        </svg>
+                    </div>
+                    <h3>Flexible Filtering</h3>
+                    <p>Focus on specific modules, exclude tests, limit call depth, and control graph size for large
+                        codebases.</p>
+                </article>
+                <article class="feature-card animate-on-scroll">
+                    <div class="feature-icon" style="--icon-color: #E53935;">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <h3>CI/CD Ready</h3>
+                    <p>Auto-update diagrams on every push with included GitHub Actions workflows.</p>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-badge">Demo</span>
+                <h2 class="section-title">See It in Action</h2>
+                <p class="section-subtitle">Interactive Mermaid diagram of PyVisualizer's architecture — just like what
+                    you'll generate!</p>
+            </div>
+            <div class="demo-container animate-on-scroll">
+                <div class="demo-header">
+                    <div class="demo-dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <span class="demo-title">architecture.mmd — PyVisualizer Call Graph</span>
+                </div>
+                <div class="demo-content mermaid-wrapper">
+                    <pre class="mermaid">
+flowchart TD
+    subgraph CLI["🖥️ CLI Layer"]
+        main["main()"]
+        parse["parse_args()"]
+    end
+    
+    subgraph Core["⚙️ Core Analysis"]
+        analyze["analyze_project()"]
+        discover["discover_files()"]
+        ModuleAnalyzer["ModuleAnalyzer"]
+        ImportCollector["ImportCollector"]
+    end
+    
+    subgraph Graph["📊 Graph Building"]
+        build["build_call_graph()"]
+        GraphBuilder["GraphBuilder"]
+        resolve["resolve_calls()"]
+    end
+    
+    subgraph Visualizers["🎨 Visualizers"]
+        d3["generate_d3_html()"]
+        mermaid["generate_mermaid()"]
+        svg["generate_svg()"]
+    end
+    
+    subgraph Output["📤 Output"]
+        html["architecture.html"]
+        mmd["architecture.mmd"]
+        image["architecture.svg/png"]
+    end
+    
+    main --> parse
+    main --> analyze
+    analyze --> discover
+    analyze --> ModuleAnalyzer
+    ModuleAnalyzer --> ImportCollector
+    analyze --> build
+    build --> GraphBuilder
+    GraphBuilder --> resolve
+    build --> d3
+    build --> mermaid
+    build --> svg
+    d3 --> html
+    mermaid --> mmd
+    svg --> image
+
+    style CLI fill:#5D2E8C,stroke:#3D1D5C,color:#fff
+    style Core fill:#2962FF,stroke:#1E4BC9,color:#fff
+    style Graph fill:#00C853,stroke:#00963D,color:#fff
+    style Visualizers fill:#FF6D00,stroke:#CC5700,color:#fff
+    style Output fill:#AA00FF,stroke:#8800CC,color:#fff
+                    </pre>
+                </div>
+            </div>
+            <div class="demo-features">
+                <div class="demo-feature">
+                    <span class="demo-feature-icon">🔍</span>
+                    <span>Zoom with mouse wheel</span>
+                </div>
+                <div class="demo-feature">
+                    <span class="demo-feature-icon">🖱️</span>
+                    <span>Pan by dragging</span>
+                </div>
+                <div class="demo-feature">
+                    <span class="demo-feature-icon">📋</span>
+                    <span>Renders on GitHub</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Installation Section -->
+    <section class="installation" id="installation">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-badge">Quick Start</span>
+                <h2 class="section-title">Up and Running in Seconds</h2>
+                <p class="section-subtitle">Install from PyPI and generate your first diagram</p>
+            </div>
+            <div class="install-grid">
+                <div class="install-step animate-on-scroll">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Install</h3>
+                        <div class="code-block">
+                            <code>pip install py-code-visualizer</code>
+                            <button class="copy-btn" data-copy="pip install py-code-visualizer" aria-label="Copy">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="install-step animate-on-scroll">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Generate Interactive HTML</h3>
+                        <div class="code-block">
+                            <code>py-code-visualizer /path/to/project --format html -o architecture.html</code>
+                            <button class="copy-btn"
+                                data-copy="py-code-visualizer /path/to/project --format html -o architecture.html"
+                                aria-label="Copy">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="install-step animate-on-scroll">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Or Generate Mermaid</h3>
+                        <div class="code-block">
+                            <code>py-code-visualizer /path/to/project --format mermaid -o architecture.mmd</code>
+                            <button class="copy-btn"
+                                data-copy="py-code-visualizer /path/to/project --format mermaid -o architecture.mmd"
+                                aria-label="Copy">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="cli-options animate-on-scroll">
+                <h3>CLI Options</h3>
+                <div class="options-table">
+                    <div class="option-row">
+                        <code>--format, -f</code>
+                        <span>html, mermaid, svg, png</span>
+                    </div>
+                    <div class="option-row">
+                        <code>--modules, -m</code>
+                        <span>Filter to specific modules</span>
+                    </div>
+                    <div class="option-row">
+                        <code>--exclude, -x</code>
+                        <span>Exclude patterns (e.g., tests)</span>
+                    </div>
+                    <div class="option-row">
+                        <code>--entry, -e</code>
+                        <span>Entry point function</span>
+                    </div>
+                    <div class="option-row">
+                        <code>--depth, -d</code>
+                        <span>Max call depth from entry</span>
+                    </div>
+                    <div class="option-row">
+                        <code>--max-nodes</code>
+                        <span>Limit graph size (default: 150)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison" id="comparison">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-badge">Why PyVisualizer?</span>
+                <h2 class="section-title">The Right Tool for the Job</h2>
+                <p class="section-subtitle">See how PyVisualizer compares to other Python visualization tools</p>
+            </div>
+            <div class="comparison-table-wrapper animate-on-scroll">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>PyVisualizer</th>
+                            <th>Pydeps</th>
+                            <th>Pyreverse</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Primary Focus</td>
+                            <td class="highlight">Function Call Graphs</td>
+                            <td>Module Dependencies</td>
+                            <td>UML Class Diagrams</td>
+                        </tr>
+                        <tr>
+                            <td>Interactive Visualization</td>
+                            <td class="highlight">✓ D3.js with search, filter, zoom</td>
+                            <td>✗ Static images only</td>
+                            <td>✗ Static images only</td>
+                        </tr>
+                        <tr>
+                            <td>GitHub-Native Diagrams</td>
+                            <td class="highlight">✓ Mermaid support</td>
+                            <td>✗</td>
+                            <td>✓ Mermaid support</td>
+                        </tr>
+                        <tr>
+                            <td>Function-Level Detail</td>
+                            <td class="highlight">✓</td>
+                            <td>✗</td>
+                            <td>✓ (Classes only)</td>
+                        </tr>
+                        <tr>
+                            <td>Dark Mode</td>
+                            <td class="highlight">✓</td>
+                            <td>✗</td>
+                            <td>✗</td>
+                        </tr>
+                        <tr>
+                            <td>CI/CD Integration</td>
+                            <td class="highlight">✓ Included workflows</td>
+                            <td>Manual setup</td>
+                            <td>Manual setup</td>
+                        </tr>
+                        <tr>
+                            <td>Output Formats</td>
+                            <td class="highlight">HTML, Mermaid, SVG, PNG</td>
+                            <td>SVG, PNG</td>
+                            <td>DOT, PNG, SVG, PlantUML</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="comparison-callout animate-on-scroll">
+                <div class="callout-icon">💡</div>
+                <div class="callout-content">
+                    <h4>When to use which?</h4>
+                    <p><strong>PyVisualizer:</strong> Understanding function flow, interactive exploration, onboarding
+                        engineers</p>
+                    <p><strong>Pydeps:</strong> High-level module dependency mapping</p>
+                    <p><strong>Pyreverse:</strong> UML documentation, class inheritance visualization</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonial/Use Cases -->
+    <section class="use-cases" id="use-cases">
+        <div class="container">
+            <div class="use-cases-grid">
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">👨‍💻</div>
+                    <h3>For Developers</h3>
+                    <p>Quickly understand unfamiliar codebases. Navigate function calls visually instead of jumping
+                        through files.</p>
+                </div>
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">🏗️</div>
+                    <h3>For Architects</h3>
+                    <p>Document system architecture automatically. Detect cyclic dependencies and refactoring
+                        opportunities.</p>
+                </div>
+                <div class="use-case animate-on-scroll">
+                    <div class="use-case-icon">🎓</div>
+                    <h3>For Teams</h3>
+                    <p>Reduce onboarding time from days to hours. Keep architecture diagrams always up-to-date with
+                        CI/CD.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content animate-on-scroll">
+                <h2>Ready to Visualize Your Code?</h2>
+                <p>Get started in seconds with a single command</p>
+                <div class="cta-install">
+                    <div class="install-box large">
+                        <code>pip install py-code-visualizer</code>
+                        <button class="copy-btn" data-copy="pip install py-code-visualizer" aria-label="Copy command">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                            </svg>
+                            <svg class="check-icon" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="cta-links">
+                    <a href="https://github.com/haider1998/pyvisualizer" target="_blank" rel="noopener"
+                        class="btn btn-secondary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                        Star on GitHub
+                    </a>
+                    <a href="https://pypi.org/project/py-code-visualizer/" target="_blank" rel="noopener"
+                        class="btn btn-outline">
+                        View on PyPI
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="images/PyVizualizer_Logo.png" alt="PyVisualizer" class="footer-logo">
+                    <p>Transform Python code into beautiful architecture diagrams</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-col">
+                        <h4>Resources</h4>
+                        <ul>
+                            <li><a href="https://github.com/haider1998/pyvisualizer#readme" target="_blank"
+                                    rel="noopener">Documentation</a></li>
+                            <li><a href="https://pypi.org/project/py-code-visualizer/" target="_blank"
+                                    rel="noopener">PyPI Package</a></li>
+                            <li><a href="https://github.com/haider1998/pyvisualizer/releases" target="_blank"
+                                    rel="noopener">Changelog</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Community</h4>
+                        <ul>
+                            <li><a href="https://github.com/haider1998/pyvisualizer" target="_blank"
+                                    rel="noopener">GitHub</a></li>
+                            <li><a href="https://github.com/haider1998/pyvisualizer/issues" target="_blank"
+                                    rel="noopener">Issues</a></li>
+                            <li><a href="https://github.com/haider1998/pyvisualizer/blob/main/CONTRIBUTING.md"
+                                    target="_blank" rel="noopener">Contributing</a></li>
+                        </ul>
+                    </div>
+                    <div class="footer-col">
+                        <h4>Legal</h4>
+                        <ul>
+                            <li><a href="https://github.com/haider1998/pyvisualizer/blob/main/LICENSE" target="_blank"
+                                    rel="noopener">MIT License</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Made with ❤️ by <a href="https://github.com/haider1998" target="_blank" rel="noopener">Syed Mohd
+                        Haider Rizvi</a></p>
+                <p class="copyright">© 2026 PyVisualizer. Open source under MIT License.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mermaid.js for diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        // Store original diagram code
+        const mermaidCode = document.querySelector('.mermaid').textContent;
+
+        function initMermaid() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            mermaid.initialize({
+                startOnLoad: false,
+                theme: isDark ? 'dark' : 'default',
+                flowchart: {
+                    useMaxWidth: true,
+                    htmlLabels: true,
+                    curve: 'basis'
+                },
+                securityLevel: 'loose'
+            });
+        }
+
+        async function renderMermaid() {
+            const container = document.querySelector('.mermaid');
+            container.innerHTML = mermaidCode;
+            container.removeAttribute('data-processed');
+            initMermaid();
+            await mermaid.run({ nodes: [container] });
+        }
+
+        // Initial render
+        initMermaid();
+        mermaid.run();
+
+        // Re-render on theme change
+        const themeObserver = new MutationObserver(async () => {
+            await renderMermaid();
+        });
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    </script>
+    <script src="script.js"></script>
+</body>
+
+</html>

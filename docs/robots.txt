@@ -1,0 +1,7 @@
+# PyVisualizer Website
+# https://haider1998.github.io/pyvisualizer/
+
+User-agent: *
+Allow: /
+
+Sitemap: https://haider1998.github.io/pyvisualizer/sitemap.xml
